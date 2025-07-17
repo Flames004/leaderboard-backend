@@ -7,7 +7,9 @@ const userRoutes = require('./routes/userRoutes');
 const claimRoutes = require('./routes/claimRoutes');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://leaderboard-flames.netlify.app'
+}));  // updated after deployment of frontend
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
