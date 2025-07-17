@@ -5,32 +5,34 @@ require('dotenv').config();
 
 const app = express();
 
-// ✅ Allow only your frontend domain
+// ✅ CORS Setup — VERY IMPORTANT
 app.use(cors({
-  origin: 'https://leaderboard-flames.netlify.app'
+  origin: 'https://leaderboard-flames.netlify.app',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
 }));
 
+// ✅ Middleware
 app.use(express.json());
 
-// ✅ Routes AFTER CORS
+// ✅ Routes
 const userRoutes = require('./routes/userRoutes');
 const claimRoutes = require('./routes/claimRoutes');
+
 app.use('/api/users', userRoutes);
 app.use('/api/claim', claimRoutes);
 
-// ✅ Optional root route (health check)
+// ✅ Optional: Root route for health check
 app.get('/', (req, res) => {
   res.send('Leaderboard API is running');
 });
 
-// ✅ Server start
+// ✅ Server and DB connection
 const PORT = process.env.PORT || 5000;
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log("MongoDB Connected");
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-})
-.catch(err => console.error(err));
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB Connected");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch(err => console.error(err));
