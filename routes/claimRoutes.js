@@ -34,4 +34,23 @@ router.post('/:userId', async (req, res) => {
   }
 });
 
+// GET /api/claim/history — all claims, newest first
+router.get('/history', async (req, res) => {
+  try {
+    const history = await ClaimHistory.find()
+      .sort({ timestamp: -1 })
+      .populate('userId', 'name'); // to get user's name
+
+    const formatted = history.map(entry => ({
+      user: entry.userId ? entry.userId.name : 'Deleted User',
+      points: entry.pointsClaimed,
+      time: entry.timestamp
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
