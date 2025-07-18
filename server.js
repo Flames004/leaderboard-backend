@@ -5,13 +5,61 @@ require('dotenv').config();
 
 const app = express();
 
-// ✅ CORS Setup — VERY IMPORTANT
-app.use(cors({
-  origin: ['https://leaderboard-flames.netlify.app', 'http://localhost:5173'],
+// ✅ Enhanced CORS Setup
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://leaderboard-flames.netlify.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ];
+    
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// Additional CORS middleware for preflight requests
+app.options('*', cors(corsOptions));
+
+// Manual CORS headers as fallback
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://leaderboard-flames.netlify.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  
+  next();
+});
 
 // ✅ Middleware
 app.use(express.json());
