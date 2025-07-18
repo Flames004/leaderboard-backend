@@ -7,9 +7,10 @@ const app = express();
 
 // ✅ CORS Setup — VERY IMPORTANT
 app.use(cors({
-  origin: 'https://leaderboard-flames.netlify.app',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
+  origin: ['https://leaderboard-flames.netlify.app', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // ✅ Middleware
